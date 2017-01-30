@@ -15,4 +15,4 @@ typedef struct _S_TIMER_
 
 void Tmr_Init(S_TIMER *p_timer, uint16 p_task, S_TIMER_COUNT p_init_val, uint8 p_count_type, uint8 p_auto_rst);
 uint8 Tmr_Update(S_TIMER *p_timer);
-
+void Tmr_Reset(S_TIMER *p_timer);

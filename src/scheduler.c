@@ -35,29 +35,15 @@ static const S_TASK_CONF gc_task_conf[TASK_NUM_MAX] =
 {
 	{10u,  1u, &Scheduler_Task1, }, 	/* Task 1 */
 	{20u , 2u, &Scheduler_Task2, },		/* Task 2 */
-	{500u , 3u, &Scheduler_Task3, },		/* Task 3 */
+	{500u , 3u, &Scheduler_Task3, },	/* Task 3 */
 };
 
-static int var1;
-static int var2;
 S_TASK g_task;
 
 void Scheduler_Init(void)
 {
-
-/*	int i;
-	for(i = 0; i< 2; i++)
-	{
-		g_task[i].m_task_id = i;
-		g_task[i].m_task_period = (i + 1) * 5u;
-	}
-
-	g_task[0].m_func_period = Scheduler_Task1;
-	g_task[1].m_func_period = Scheduler_Task2;
-*/
 	g_task.m_task_id = (uint8) 0;
 	g_task.m_task_period = (uint16) 0;
-
 }
 
 void Scheduler_Periodical(void)
@@ -81,19 +67,16 @@ void Scheduler_Periodical(void)
 
 static void Scheduler_Task1(void)
 {
-	var1++;
+	KeyMng_Periodical();
 }
 
 
 static void Scheduler_Task2(void)
 {
-	KeyMng_Periodical();
-	var2++;
+
 }
 
 static void Scheduler_Task3(void)
 {
-	int p_var;
-	p_var = var1 + var2;
 }
 

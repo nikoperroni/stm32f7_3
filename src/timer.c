@@ -1,3 +1,4 @@
+#include "types.h"
 #include "timer.h"
 
 
@@ -42,4 +43,10 @@ uint8 Tmr_Update(S_TIMER *p_timer)
 		is_elapsed = 1u;
 	}
 	return is_elapsed;
+}
+
+
+void Tmr_Reset(S_TIMER *p_timer)
+{
+	p_timer->m_count_ms = p_timer->m_init_tmr;
 }

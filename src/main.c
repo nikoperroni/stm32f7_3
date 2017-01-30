@@ -37,11 +37,11 @@
   */
 
 /* Includes ------------------------------------------------------------------*/
-#include "main.h"
-#include "RGB565_480x272.h"
-#include "stm32746g_discovery_ts.h"
+
 #include "scheduler.h"
 #include "usart.h"
+#include "display_screen.h"
+#include "main.h"
 
 
 /** @addtogroup STM32F7xx_HAL_Examples
@@ -74,116 +74,39 @@ static uint32_t act_tick = 0u;
   */
 int main(void)
 {
-  /* Configure the MPU attributes as Write Through */
-  MPU_Config();
-  RCC_PeriphCLKInitTypeDef  PeriphClkInitStruct;
-  TS_StateTypeDef TS_State;
-  uint8_t ts_state;
-  char* string1 = "Nico";
-  char* string2 = "Perroni";
-  char* string3 = "       ";
-  uint8_t fsm_state = 0;
-  /* Enable the CPU Cache */
-  CPU_CACHE_Enable();
+    uint8_t ts_state;
+
+    /* Configure the MPU attributes as Write Through */
+    MPU_Config();
+    /* Enable the CPU Cache */
+    CPU_CACHE_Enable();
 
 
-  /* STM32F7xx HAL library initialization:
-       - Configure the Flash ART accelerator on ITCM interface
-       - Systick timer is configured by default as source of time base, but user 
-         can eventually implement his proper time base source (a general purpose 
-         timer for example or other time source), keeping in mind that Time base 
-         duration should be kept 1ms since PPP_TIMEOUT_VALUEs are defined and 
-         handled in milliseconds basis.
-       - Set NVIC Group Priority to 4
-       - Low Level Initialization
-     */
-  HAL_Init();
-  Scheduler_Init();
-  /* Configure the system clock to 216 MHz */
-  SystemClock_Config();
-  
-  UsartMng_Config();
-  /* LCD clock configuration */
-  /* PLLSAI_VCO Input = HSE_VALUE/PLL_M = 1 Mhz */
-  /* PLLSAI_VCO Output = PLLSAI_VCO Input * PLLSAIN = 192 Mhz */
-  /* PLLLCDCLK = PLLSAI_VCO Output/PLLSAIR = 192/5 = 38.4 Mhz */
-  /* LTDC clock frequency = PLLLCDCLK / LTDC_PLLSAI_DIVR_4 = 38.4/4 = 9.6Mhz */
-  PeriphClkInitStruct.PeriphClockSelection = RCC_PERIPHCLK_LTDC;
-  PeriphClkInitStruct.PLLSAI.PLLSAIN = 192;
-  PeriphClkInitStruct.PLLSAI.PLLSAIR = 5;
-  PeriphClkInitStruct.PLLSAIDivR = RCC_PLLSAIDIVR_4;
-  HAL_RCCEx_PeriphCLKConfig(&PeriphClkInitStruct);
-  
-  /* Configure LED1 */
-  BSP_LED_Init(LED1);   
-  /* Configure LCD : Only one layer is used */
-  LCD_Config();
+    /* STM32F7xx HAL library initialization:
+           - Configure the Flash ART accelerator on ITCM interface
+           - Systick timer is configured by default as source of time base, but user 
+             can eventually implement his proper time base source (a general purpose 
+             timer for example or other time source), keeping in mind that Time base 
+             duration should be kept 1ms since PPP_TIMEOUT_VALUEs are defined and 
+             handled in milliseconds basis.
+           - Set NVIC Group Priority to 4
+           - Low Level Initialization
+         */
+    HAL_Init();
 
+    /* Configure the system clock to 216 MHz */
 
+    SystemClock_Config();
 
-  /* init the touchscreen */
-  BSP_TS_Init( (uint16_t)480, (uint16_t)272);
-  /* Our main starts here */
-  uint16_t ypos = 0, ymax = 0;
-	int8_t yincr = 1;
-	BSP_LCD_SetTextColor(LCD_COLOR_BLACK);
-	BSP_LCD_SetBackColor(LCD_COLOR_YELLOW);
-	BSP_LCD_SetTextColor(LCD_COLOR_RED);
-	BSP_LCD_DrawCircle( (uint16_t)230u, (uint16_t)150u, (uint16_t)50u);
-	BSP_LCD_FillCircle((uint16_t)230u, (uint16_t)150u, (uint16_t)50u);
-	BSP_LCD_SetBackColor(LCD_COLOR_GREEN);
-	BSP_LCD_SetTextColor(LCD_COLOR_YELLOW);
+    /* Init application managers */
+    KeyMng_Init(10u);
+    DisplayScreen_init();
+    Scheduler_Init();
+    UsartMng_Config();
 
-	while(1) {
-
-//	act_tick = HAL_GetTick();
-
-	Scheduler_Periodical();
-
-/*	  if(ypos == 0) {
-		  yincr = 1;
-		  ymax = BSP_LCD_GetYSize();
-	  } else {
-		  yincr = -1;
-		  ymax = 0;
-	  }
-	  ts_state = BSP_TS_GetState(&TS_State);
-	  if(TS_State.touchDetected >= 1)
-	  {
-		  fsm_state ^= 1;
-		  BSP_LCD_DisplayStringAt(0, ypos, string3, CENTER_MODE);
-	  }
-	  else
-	  {
-
-	  }
-	  for(;yincr == 1 ? ypos < BSP_LCD_GetYSize() - Font24.Height : ypos > 0; ypos+=yincr) {
-
-		  if(fsm_state == 0)
-		  {
-			  BSP_LCD_DisplayStringAt(0, ypos, string2, CENTER_MODE);
-		  }
-		  else
-		  {
-			  BSP_LCD_DisplayStringAt(0, ypos, string1, CENTER_MODE);
-		  }
-
-	  }
-*/
-	ts_state = BSP_TS_GetState(&TS_State);
-	for(int x1= 0; x1<5; x1++)
-	{
-		if( (TS_State.touchX[x1] > 230) && TS_State.touchX[x1] < (230 + 50) )
-		{
-			 BSP_LCD_DisplayStringAt(0, 120, string1, CENTER_MODE);
-			// sendUart();
-
-		}else{}
-	}
-
-
-
-
+    while(1) 
+    {
+        Scheduler_Periodical();
 	}
 }
 
@@ -250,37 +173,6 @@ void SystemClock_Config(void)
   }  
 }
 
-/**
-  * @brief LCD Configuration.
-  * @note  This function Configure tha LTDC peripheral :
-  *        1) Configure the Pixel Clock for the LCD
-  *        2) Configure the LTDC Timing and Polarity
-  *        3) Configure the LTDC Layer 1 :
-  *           - The frame buffer is located at FLASH memory
-  *           - The Layer size configuration : 480x272                      
-  * @retval
-  *  None
-  */
-static void LCD_Config(void)
-{ 
-	  /* LCD Initialization */
-	  BSP_LCD_Init();
-
-	  /* LCD Initialization */
-	  BSP_LCD_LayerDefaultInit(0, LCD_FB_START_ADDRESS);
-
-	  /* Enable the LCD */
-	  BSP_LCD_DisplayOn();
-
-	  /* Select the LCD Background Layer  */
-	  BSP_LCD_SelectLayer(0);
-
-	  /* Clear the Background Layer */
-	  BSP_LCD_Clear(LCD_COLOR_BLACK);
-
-	  /* Configure the transparency for background */
-	  BSP_LCD_SetTransparency(0, 100);
-}
 
 /**
   * @brief  This function is executed in case of error occurrence.

@@ -44,3 +44,4 @@
 
 extern void UsartMng_Config(void);
 extern void MPU_Config(void);
+extern void sendUartMex(char *p_mex, int psize);

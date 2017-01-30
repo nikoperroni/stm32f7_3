@@ -170,3 +170,12 @@ void sendUart(void)
 	    Error_Handler();
 	  }
 }
+
+void sendUartMex(char *p_mex, int psize)
+{
+    if(HAL_UART_Transmit(&UartHandle, (uint8_t*)p_mex, psize, 5000)!= HAL_OK)
+    {
+      Error_Handler();
+    }
+}
+
