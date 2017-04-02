@@ -15,7 +15,7 @@ void Tmr_TimInit(void)
 
 uint8 Tmr_SimInit(void)
 {
-
+	return 0;
 }
 
 void Tmr_Init(S_TIMER *p_timer, uint16 p_task, S_TIMER_COUNT p_init_val, uint8 p_count_type, uint8 p_auto_rst)

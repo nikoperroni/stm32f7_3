@@ -20,22 +20,23 @@ typedef struct _S_TASK_CONF_
 	uint16	m_task_period;
 	uint8 m_task_priority;
 	funcp_task m_task_function;
+	uint8 m_task_execute;
 }S_TASK_CONF;
 
 typedef struct _S_TASK_
 {
 	uint8 m_task_id;
 	uint16 m_task_period;
-	const S_TASK_CONF *m_conf;
+	S_TASK_CONF *m_conf;
 }S_TASK;
 
 
 
-static const S_TASK_CONF gc_task_conf[TASK_NUM_MAX] =
+static S_TASK_CONF gc_task_conf[TASK_NUM_MAX] =
 {
-	{10u,  1u, &Scheduler_Task1, }, 	/* Task 1 */
-	{20u , 2u, &Scheduler_Task2, },		/* Task 2 */
-	{500u , 3u, &Scheduler_Task3, },	/* Task 3 */
+	{10u,  1u, &Scheduler_Task1, FALSE,}, 	/* Task 1 */
+	{20u , 2u, &Scheduler_Task2, FALSE,},		/* Task 2 */
+	{500u , 3u, &Scheduler_Task3, FALSE,},	/* Task 3 */
 };
 
 S_TASK g_task;
@@ -55,14 +56,33 @@ void Scheduler_Periodical(void)
 	{
 		g_task.m_conf = &gc_task_conf[i];
 
-		if( (current_tick % g_task.m_conf->m_task_period) == 0 )
+		if(g_task.m_conf->m_task_execute == TRUE)
 		{
 			/* Execute task */
 			g_task.m_conf->m_task_function();
+			g_task.m_conf->m_task_execute = FALSE;
 		}
 		else{}
 	}
 
+}
+
+void Scheduler_ExecuteTask(void)
+{
+	int i;
+	uint32 current_tick;
+	current_tick = HAL_GetTick();
+	for(i = 0; i< 2; i++)
+	{
+		g_task.m_conf = &gc_task_conf[i];
+
+		if( (current_tick % g_task.m_conf->m_task_period) == 0 )
+		{
+			/* Execute task */
+			g_task.m_conf->m_task_execute = TRUE;
+		}
+		else{}
+	}
 }
 
 static void Scheduler_Task1(void)

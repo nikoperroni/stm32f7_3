@@ -3,6 +3,7 @@
 #include "types.h"
 #include "usart.h"
 #include "timer.h"
+#include "display_screen.h"
 #include "key_mng.h"
 
 #define KEY_BUTTON_OFF 	(uint8) 0
@@ -42,10 +43,10 @@ typedef struct _S_KEY_MNG_
 
 static const  S_KEY_DEB gc_key_deb_conf[KEY_BUTTON_MAX_NUM] =
 {
-	{0, 0u,  40u, 70u, (S_TIMER_COUNT)40, KEY_BUTTON_ON},
-	{1, 100u,  40u, 70u, (S_TIMER_COUNT)40, KEY_BUTTON_ON},
-	{2, 200u, 40u, 70u, (S_TIMER_COUNT)40, KEY_BUTTON_ON},
-	{3, 310u,  40u,  70u, (S_TIMER_COUNT)40, KEY_BUTTON_ON},
+	{0, 0u,  40u, 70u, (S_TIMER_COUNT)20, KEY_BUTTON_ON},
+	{1, 100u,  40u, 70u, (S_TIMER_COUNT)20, KEY_BUTTON_ON},
+	{2, 200u, 40u, 70u, (S_TIMER_COUNT)20, KEY_BUTTON_ON},
+	{3, 310u,  40u,  70u, (S_TIMER_COUNT)20, KEY_BUTTON_ON},
 };
 
 static void KeyMng_GetKeyStatus(S_KEY_DEB *p_key);
@@ -119,22 +120,25 @@ static uint8 KeyMng_HandleSts(S_KEY_DEB *p_key)
 	if(is_elapsed == TRUE)
 	{
 		/* If the previous state is on switch to off */
-		if(p_key->m_key_sts == KEY_BUTTON_ON)
+/*		if(p_key->m_key_sts == KEY_BUTTON_ON)
 		{
 			p_key->m_key_sts = KEY_BUTTON_OFF;	
 			g_key_mng.m_touch_pos.new_pos = FALSE;
 		}
 		else if(p_key->m_key_sts == KEY_BUTTON_OFF)
-		{
-			p_key->m_key_sts = KEY_BUTTON_ON;
-			id_converted = (p_key->m_key_id + 48);
+		{ 
+			p_key->m_key_sts = KEY_BUTTON_ON;*/
+			id_converted = (p_key->m_key_id + 48); 
 			sendUartMex( &id_converted, 1u);
 			g_key_mng.m_touch_pos.new_pos = FALSE;
-		} 
+			DisplayScreen_ActionOnEvent(DISPLAY_MOVE_RECT, 0u);
+		//} 
 		Tmr_Reset(&(g_key_mng.m_key_status[p_key->m_key_id].m_key_deb_tmr));
 	}
 	else{}
 	
+	return 0;
+
 }
 
 

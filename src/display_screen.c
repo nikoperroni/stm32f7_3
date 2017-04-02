@@ -10,12 +10,14 @@
 #include "stm32f7xx_hal.h"
 #include "stm32746g_discovery.h"
 #include "stm32746g_discovery_lcd.h"
+#include "stm32f7xx_hal_rng.h" 
 #include "display_screen.h"
 
 static void DisplayScreen_initPeripheralClock(void);
 static void DisplayScreen_LCDConfig(void);
 
-
+uint16 g_var = 0;
+uint16 g_h_value = 140;
 
 static void DisplayScreen_initPeripheralClock(void)
 {
@@ -131,3 +133,56 @@ void DisplayScreen_init(void)
 }
 
 
+void HAL_RNG_MspInit(RNG_HandleTypeDef *hrng)
+{
+	__HAL_RCC_RNG_CLK_ENABLE();
+}
+
+
+void DisplayScreen_RandomRect(void)
+{
+	HAL_StatusTypeDef retval;
+	RNG_HandleTypeDef hrng;
+	uint32_t randomNumber;
+	uint16_t castNumber, final_num;
+
+	HAL_RNG_MspInit(&hrng);
+
+	retval = HAL_RNG_GenerateRandomNumber(&hrng,&randomNumber);
+	castNumber = (uint16)randomNumber;
+	final_num = (uint16)( ((float)420 / (float)castNumber)* 1000); 
+
+	BSP_LCD_SetTextColor(LCD_COLOR_YELLOW);
+  	BSP_LCD_FillRect(final_num, final_num, 30, 30);			
+
+	//sendUartMex( &final_num, 1u);
+
+}
+
+void DisplayScreen_ActionOnEvent(uint16 p_event, uint16 p_action)
+{
+
+	if(p_event == DISPLAY_MOVE_RECT)
+	{
+	  	BSP_LCD_SetTextColor(LCD_COLOR_WHITE);
+  		BSP_LCD_FillRect(0, g_h_value, 70, 70);
+		
+		if(g_h_value > 270)
+		{
+			g_h_value = 140;
+			g_var = 0;
+		}
+		else
+		{
+  			g_var++;
+			g_h_value += g_var;			  							
+		  	BSP_LCD_SetTextColor(LCD_COLOR_RED);
+  			BSP_LCD_FillRect(0, g_h_value, 70, 70);		
+		}
+
+	}
+	else{}
+
+	DisplayScreen_RandomRect();
+
+}

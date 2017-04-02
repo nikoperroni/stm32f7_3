@@ -10,5 +10,5 @@
 
 void Scheduler_Init(void);
 void Scheduler_Periodical(void);
-
+void Scheduler_ExecuteTask(void);
 #endif /* SCHEDULER_H_ */
